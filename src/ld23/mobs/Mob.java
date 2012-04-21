@@ -23,7 +23,7 @@ public class Mob {
     
     private Animation move, idle, glow;
     
-    private final java.net.URL imgURL = getClass().getResource("/ld23/hero.png");
+    private final java.net.URL imgURL = getClass().getResource("/hero.png");
     private BufferedImage heroSprites;
         
     private final BufferedImage hero_idle;
