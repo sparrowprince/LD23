@@ -2,7 +2,6 @@ package ld23;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
@@ -40,7 +39,7 @@ public class GameComponent extends JComponent implements Runnable{
         
     public GameComponent(KeyPoller keyPoller){
         fps = ups = 100;
-        player = new Mob(0,0,WIDTH,HEIGHT);
+        player = new Mob(0,0,32,64,WIDTH,HEIGHT);
         testShape = new Shape(0,460,640,20);
         this.keyPoller = keyPoller;
         setPreferredSize(new Dimension(WIDTH,HEIGHT));}
@@ -146,7 +145,7 @@ public class GameComponent extends JComponent implements Runnable{
         else if(keyPoller.isKeyDown(KeyEvent.VK_LEFT))
             player.moveHorizontally(-1);
         
-        player.setFalling(!testShape.topOfSolid(player.getPosX(),player.getPosY()+64));
+        player.setFalling(!testShape.topOfSolid(player.getPosX(),player.getPosX()+player.getWidth(),player.getPosY()+player.getHeight()));
         player.update();
         if(player.isDead()) running = false; 
     }

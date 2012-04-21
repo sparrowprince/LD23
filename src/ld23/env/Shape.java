@@ -5,7 +5,7 @@ import java.awt.Graphics2D;
 
 public class Shape {
     
-    private static final Short[] values = {0,1,2,1};
+    private static final Short[] values = {1,1,2,1};
     private static final Color[] colors = {Color.BLUE,Color.YELLOW,Color.ORANGE,Color.GRAY};
     
     private int px,py,width,height;
@@ -19,7 +19,7 @@ public class Shape {
                 area[i][j]=values[(int)(Math.random()*4)];}
     
     //is px,py on top of a solid object of me?
-    public boolean topOfSolid(int px, int py){
+    public boolean topOfSolid(int px, int px2, int py){
         py++;//one pixel below needs to be inside a solid
         if(px<this.px || px>=px+width*5 || py<this.py || py>=this.py+height*5)
             return false;
