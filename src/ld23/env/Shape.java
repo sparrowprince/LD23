@@ -27,13 +27,13 @@ public class Shape {
             return false;
         return true;}
     
-    public void draw(Graphics2D g){
+    public void draw(int offX, int offY, Graphics2D g){
         int block;
         for(int i=0;i<width;i++)
             for(int j=0;j<height;j++){
                 if((block=area[i][j])!=0){
                     g.setColor(colors[block]);
-                    g.fillRect(px+i*5,py+j*5,5,5);}}}
+                    g.fillRect(px+i*5 + offX, py+j*5 + offY, 5, 5);}}}
     
 
 

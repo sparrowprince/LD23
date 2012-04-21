@@ -24,11 +24,17 @@ public class GameComponent extends JComponent implements Runnable{
     private static final int WIDTH = 640;
     private static final int HEIGHT = 480;
     
+    //for shake effect.. explosions and such
+    private int offsetX = 0;
+    private int offsetY = 0;
+    private int shakeCounter = 0;
+    
     private static final long ONESECOND = 1000000000;
     private static final long SLEEPTIME = ONESECOND/100;//in nanoseconds.. aiming at 100FPS
         
     private Thread looper;//main loop'll be in a thread for max time precision
     private boolean running=false;//used in main loop
+    //private boolean shake = true;
     private Graphics2D graphics;
     private BufferedImage bufferImage=null;//for double buffering ;-) isn't that enabled by default in Java now anyways? hm! 
     private KeyPoller keyPoller;
@@ -107,17 +113,20 @@ public class GameComponent extends JComponent implements Runnable{
         catch(Exception e){
             System.err.println("Error while handling graphics context!");
             e.printStackTrace();}}
+    
+    
 
     private void gameRenderBuffer(){
         if(bufferImage==null){//create our buffer image in the first run
             bufferImage = new BufferedImage(WIDTH,HEIGHT,BufferedImage.TYPE_INT_ARGB);
             graphics = bufferImage.createGraphics();}
+        
         //draw background
         graphics.setColor(Color.WHITE);
         graphics.fillRect(0,0,WIDTH,HEIGHT);
         
         //draw testShape
-        testShape.draw(graphics);
+        testShape.draw(offsetX,offsetY,graphics);
         
         //draw fps
         graphics.setColor(Color.GREEN);
@@ -126,10 +135,12 @@ public class GameComponent extends JComponent implements Runnable{
         graphics.drawString(String.format("%03dUPS",ups),WIDTH-50,20);
         
         //draw player object
-        player.draw(graphics);
+        player.draw(offsetX,offsetY,graphics);
         
         //you dead yet?
         if(!running) graphics.drawString("YOU DIED!",200,200);}
+    
+    
 
     private void gameUpdate(){
         //player movement
@@ -144,11 +155,19 @@ public class GameComponent extends JComponent implements Runnable{
             player.moveHorizontally(1);
         else if(keyPoller.isKeyDown(KeyEvent.VK_LEFT))
             player.moveHorizontally(-1);
+        if(keyPoller.isKeyDown(KeyEvent.VK_A))
+            player.shoot();
         
         player.setFalling(!testShape.topOfSolid(player.getPosX(),player.getPosX()+player.getWidth(),player.getPosY()+player.getHeight()));
         player.update();
-        if(player.isDead()) running = false; 
-    }
+        if(player.isDead()) running = false;
+        if(player.firesLaser()){//shake effect for explosions and such
+            offsetX = (int)(Math.random()*10)-5;
+            offsetY = (int)(Math.random()*10)-5;}
+        else
+            offsetX = offsetY = 0;}
+    
+    
     
     public static void main(String[] args){
         JFrame frame=new JFrame();
@@ -159,6 +178,4 @@ public class GameComponent extends JComponent implements Runnable{
         frame.addKeyListener(keyPoller);
         frame.add(gC);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setVisible(true);}
-
-}
+        frame.setVisible(true);}}
