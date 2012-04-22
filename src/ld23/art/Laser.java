@@ -29,4 +29,12 @@ public class Laser implements Drawable{
             current_height = (height*weights[i])/100;
             current_py = py+(height-current_height)/2;
             g.setColor(colors[i]);
-            g.fillRect(px-width*faces,current_py,width,current_height);}}}
+            g.fillRect(px-width*faces,current_py,width,current_height);}}
+
+    @Override
+    public int getWidth(){return 1;}
+
+    @Override
+    public int getHeight(){return 1;}
+
+}//end of class Laser

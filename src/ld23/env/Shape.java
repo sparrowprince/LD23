@@ -21,10 +21,11 @@ public class Shape {
     //is px,py on top of a solid object of me?
     public boolean topOfSolid(int px, int px2, int py){
         py++;//one pixel below needs to be inside a solid
-        if(px<this.px || px>=px+width*5 || py<this.py || py>=this.py+height*5)
+        if(py<this.py || py>=this.py+height*5)
             return false;
-        if(area[(px-this.px)/5][(py-this.py)/5]==0)
-            return false;
+        int j = (py-this.py)/5;
+        for(int i=(px-this.px)/5;i<=((px2-this.px)/5)%width;i++)
+            if(area[i][j]==0) return false;
         return true;}
     
     public void draw(int offX, int offY, Graphics2D g){

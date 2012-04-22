@@ -9,6 +9,7 @@ import java.awt.image.BufferedImage;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 
+import ld23.art.Animation;
 import ld23.env.Shape;
 import ld23.mobs.Mob;
 
@@ -27,14 +28,16 @@ public class GameComponent extends JComponent implements Runnable{
     //for shake effect.. explosions and such
     private int offsetX = 0;
     private int offsetY = 0;
-    private int shakeCounter = 0;
     
     private static final long ONESECOND = 1000000000;
     private static final long SLEEPTIME = ONESECOND/100;//in nanoseconds.. aiming at 100FPS
         
     private Thread looper;//main loop'll be in a thread for max time precision
-    private boolean running=false;//used in main loop
-    //private boolean shake = true;
+    private boolean running = false;//used in main loop
+    private boolean paused = false;
+    private boolean showFPS = false;
+    private boolean showUPS = false;
+    
     private Graphics2D graphics;
     private BufferedImage bufferImage=null;//for double buffering ;-) isn't that enabled by default in Java now anyways? hm! 
     private KeyPoller keyPoller;
@@ -45,7 +48,7 @@ public class GameComponent extends JComponent implements Runnable{
         
     public GameComponent(KeyPoller keyPoller){
         fps = ups = 100;
-        player = new Mob(0,0,32,64,WIDTH,HEIGHT);
+        player = new Mob(100,400,32,64,WIDTH,HEIGHT);
         testShape = new Shape(0,460,640,20);
         this.keyPoller = keyPoller;
         setPreferredSize(new Dimension(WIDTH,HEIGHT));}
@@ -74,7 +77,6 @@ public class GameComponent extends JComponent implements Runnable{
         long preUpdate, updateTime, preFps, fpsTime;
         int fps, ups;
         fps = ups = 0;
-        //boolean updated = false;
         updateTime = SLEEPTIME;//consider first run to be perfect
         preFps = System.nanoTime();
         while(running){           
@@ -97,7 +99,7 @@ public class GameComponent extends JComponent implements Runnable{
                 preFps = System.nanoTime();}
             
             updateTime = System.nanoTime()-preUpdate;
-            if(updateTime < SLEEPTIME){//sleep some time to spare the CPU some work ;)
+            while(updateTime < SLEEPTIME){//sleep some time to spare the CPU some work ;)
                 try{
                     Thread.sleep((SLEEPTIME-updateTime)/1000000);
                     updateTime = System.nanoTime()-preUpdate;}
@@ -121,6 +123,10 @@ public class GameComponent extends JComponent implements Runnable{
             bufferImage = new BufferedImage(WIDTH,HEIGHT,BufferedImage.TYPE_INT_ARGB);
             graphics = bufferImage.createGraphics();}
         
+        if(paused){
+            Animation.PAUSED.draw(200, 200, 2, 2, 0, graphics);
+            return;}
+        
         //draw background
         graphics.setColor(Color.WHITE);
         graphics.fillRect(0,0,WIDTH,HEIGHT);
@@ -128,38 +134,58 @@ public class GameComponent extends JComponent implements Runnable{
         //draw testShape
         testShape.draw(offsetX,offsetY,graphics);
         
-        //draw fps
-        graphics.setColor(Color.GREEN);
-        graphics.drawString(String.format("%03dFPS",fps),WIDTH-50,10);
-        graphics.setColor(Color.CYAN);
-        graphics.drawString(String.format("%03dUPS",ups),WIDTH-50,20);
+        //draw fps/ups
+        if(showFPS){
+            graphics.setColor(Color.GREEN);
+            graphics.drawString(String.format("%03dFPS",fps),WIDTH-50,10);}
+        if(showUPS){
+            graphics.setColor(Color.CYAN);
+            graphics.drawString(String.format("%03dUPS",ups),WIDTH-50,20);}
         
         //draw player object
         player.draw(offsetX,offsetY,graphics);
+        if(player.coolDown()>0){
+            graphics.setColor(Color.RED);
+            graphics.drawString("Laser: " + (player.LCOOLDOWN - player.coolDown()), 10, 10);}
         
         //you dead yet?
-        if(!running) graphics.drawString("YOU DIED!",200,200);}
+        if(!running)
+            Animation.GAMEOVER.draw(100, 200, 2, 2, 0, graphics);}
     
     
 
     private void gameUpdate(){
+        if(keyPoller.isKeyDown(KeyEvent.VK_SHIFT)){
+            if(keyPoller.isKeyDown(KeyEvent.VK_F))
+                showFPS = !showFPS;
+            else if(keyPoller.isKeyDown(KeyEvent.VK_U))
+                showUPS = !showUPS;}
+        
+        if(keyPoller.isKeyDown(KeyEvent.VK_PAUSE))
+            paused=!paused;
+        if(paused) return;
         //player movement
-        int i = 0;
-        if(keyPoller.isKeyDown(KeyEvent.VK_DOWN))
-            player.moveVertically(1);
-        else if(keyPoller.isKeyDown(KeyEvent.VK_UP))
-            player.moveVertically(-1);
-        else
-            player.stayIdle();
+        //if(keyPoller.isKeyDown(KeyEvent.VK_DOWN))
+        //    player.moveVertically(1);
+        if(keyPoller.isKeyDown(KeyEvent.VK_UP))
+            //player.moveVertically(-1);
+            player.jump();
         if(keyPoller.isKeyDown(KeyEvent.VK_RIGHT))
             player.moveHorizontally(1);
         else if(keyPoller.isKeyDown(KeyEvent.VK_LEFT))
             player.moveHorizontally(-1);
+        else
+            player.stayIdle();
         if(keyPoller.isKeyDown(KeyEvent.VK_A))
             player.shoot();
-        
-        player.setFalling(!testShape.topOfSolid(player.getPosX(),player.getPosX()+player.getWidth(),player.getPosY()+player.getHeight()));
+        else if(keyPoller.isKeyDown(KeyEvent.VK_S))
+            player.stab();
+                
         player.update();
+        player.setFalling(!testShape.topOfSolid(player.getPosX(),
+                                                player.getPosX()+player.getWidth(),
+                                                player.getPosY()+player.getHeight()));
+        
         if(player.isDead()) running = false;
         if(player.firesLaser()){//shake effect for explosions and such
             offsetX = (int)(Math.random()*10)-5;

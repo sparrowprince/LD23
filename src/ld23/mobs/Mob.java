@@ -11,11 +11,16 @@ public class Mob {
     private int width,height;
     private final int boundsX, boundsY; //the max values for x and y
     
-    private boolean isMoving,isFalling,isDead,isShooting,laserAnim = false;
+    private boolean isMoving,isFalling,isDead,isShooting,isStabbing,laserAnim = false;
     private int faces = 0;//i.e. faces right by default
     
-    private int gCounter,sCounter;  
+    private int gCounter,sCounter,lCounter;
+    private int jumpSpeed = 0;
+    private double velo;
+    
     private static final int SHOOTTIME = 100;
+    private static final int STABTIME = 35;
+    public static final int LCOOLDOWN = 500;
         
     public Mob(int px, int py, int width, int height, int boundsX, int boundsY){
         this.px = px;
@@ -44,19 +49,32 @@ public class Mob {
         while(py<0) py+=boundsY;
         py%=boundsY;}
     
+    public void jump(){
+        if(!isFalling){
+            isFalling = true;
+            jumpSpeed=-2;}}
+    
     public void stayIdle(){
         isMoving = false;}
     
     public void shoot(){
-        if(!isShooting) isShooting=true;}
+        if(!isShooting && !isStabbing && lCounter==0){
+            isShooting=true;
+            lCounter=LCOOLDOWN;}}
+    
+    public void stab(){
+        if(!isStabbing && !isShooting)
+            isStabbing=true;}
     
     public void draw(int offX, int offY, Graphics2D g){
-        if(isMoving)
-            Animation.HEROMOVE.draw(px+offX, py+offY, width, height, faces, g);
+        if(isStabbing)
+            Animation.HEROSTAB.draw(px+offX, py+offY, 2, 2, faces, g);
+        else if(isMoving)
+            Animation.HEROMOVE.draw(px+offX, py+offY, 2, 2, faces, g);
         else
-            Animation.HEROIDLE.draw(px+offX, py+offY, width, height, faces, g);
+            Animation.HEROIDLE.draw(px+offX, py+offY, 2, 2, faces, g);
         if(isShooting)
-            Animation.HEROGLOW.draw(px+offX, py+offY, width, height, faces, g);
+            Animation.HEROGLOW.draw(px+offX, py+offY, 2, 2, faces, g);
         if(laserAnim){
             Animation.HEROLASER.draw(px+18+offX,
                                      py+8+offY,
@@ -66,22 +84,25 @@ public class Mob {
     public void update(){
         updateGravitation();
         updateShooting();
+        updateStabbing();
         if(py>boundsY) isDead = true;}
     
     public boolean isDead(){return isDead;}
     public boolean firesLaser(){return laserAnim;}
+    public int coolDown(){return lCounter;}
     
     public void setFalling(boolean b){
         isFalling = b;}
     
     private void updateGravitation(){
+        velo = jumpSpeed;
         if(isFalling){
-            double velo = (++gCounter/100.0)*9.81;
+            velo +=(++gCounter/100.0)*9.81;
             //System.out.println(""+velo);
-            if(velo > 50) velo=50;
-            py+=(velo*gCounter/10.0)/2;}
+            if(velo > 50) velo=50;}
         else
-            gCounter=0;}
+            gCounter = jumpSpeed = 0;
+        py+=(velo*gCounter/10.0)/2;}
     
     private void updateShooting(){
         if(isShooting){
@@ -91,7 +112,15 @@ public class Mob {
             else if(sCounter>=30 && sCounter<=70)
                 laserAnim=true;
             else
-                laserAnim=false;}}
+                laserAnim=false;}
+        if(lCounter>0) lCounter--;}
+    
+    private void updateStabbing(){
+        if(isStabbing){
+            sCounter=++sCounter%STABTIME;
+            if(sCounter==0)
+                isStabbing=false;}}
+
     
     
 
