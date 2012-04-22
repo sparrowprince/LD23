@@ -11,7 +11,8 @@ import javax.swing.JFrame;
 
 import ld23.art.Animation;
 import ld23.env.Shape;
-import ld23.mobs.Mob;
+import ld23.mobs.Hare;
+import ld23.mobs.Tim;
 
 /**
  * 
@@ -42,13 +43,18 @@ public class GameComponent extends JComponent implements Runnable{
     private BufferedImage bufferImage=null;//for double buffering ;-) isn't that enabled by default in Java now anyways? hm! 
     private KeyPoller keyPoller;
     
-    private Mob player;
+    private Tim player;
+    
+    private Hare testHare;
+    
     private Shape testShape;
     private int fps,ups;
         
     public GameComponent(KeyPoller keyPoller){
         fps = ups = 100;
-        player = new Mob(100,400,32,64,WIDTH,HEIGHT);
+        player = new Tim(100,350,32,64,WIDTH,HEIGHT);
+        testHare = new Hare(100,400,64,64,WIDTH,HEIGHT);
+        
         testShape = new Shape(0,460,640,20);
         this.keyPoller = keyPoller;
         setPreferredSize(new Dimension(WIDTH,HEIGHT));}
@@ -128,7 +134,7 @@ public class GameComponent extends JComponent implements Runnable{
             return;}
         
         //draw background
-        graphics.setColor(Color.WHITE);
+        graphics.setColor(Color.GRAY);
         graphics.fillRect(0,0,WIDTH,HEIGHT);
         
         //draw testShape
@@ -141,6 +147,8 @@ public class GameComponent extends JComponent implements Runnable{
         if(showUPS){
             graphics.setColor(Color.CYAN);
             graphics.drawString(String.format("%03dUPS",ups),WIDTH-50,20);}
+        
+        testHare.draw(offsetX,offsetY,graphics);
         
         //draw player object
         player.draw(offsetX,offsetY,graphics);
@@ -164,6 +172,10 @@ public class GameComponent extends JComponent implements Runnable{
         if(keyPoller.isKeyDown(KeyEvent.VK_PAUSE))
             paused=!paused;
         if(paused) return;
+        
+        testHare.moveHorizontally(-0.5);
+        testHare.update(testShape.getNextHalt(testHare.getPosX(),testHare.getPosX()+testHare.getWidth(),testHare.getPosY()+testHare.getHeight()));
+        
         //player movement
         //if(keyPoller.isKeyDown(KeyEvent.VK_DOWN))
         //    player.moveVertically(1);
@@ -181,10 +193,7 @@ public class GameComponent extends JComponent implements Runnable{
         else if(keyPoller.isKeyDown(KeyEvent.VK_S))
             player.stab();
                 
-        player.update();
-        player.setFalling(!testShape.topOfSolid(player.getPosX(),
-                                                player.getPosX()+player.getWidth(),
-                                                player.getPosY()+player.getHeight()));
+        player.update(testShape.getNextHalt(player.getPosX(),player.getPosX()+player.getWidth(),player.getPosY()+player.getHeight()));
         
         if(player.isDead()) running = false;
         if(player.firesLaser()){//shake effect for explosions and such

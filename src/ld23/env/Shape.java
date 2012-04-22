@@ -28,6 +28,15 @@ public class Shape {
             if(area[i][j]==0) return false;
         return true;}
     
+    public int getNextHalt(int px, int px2, int py){
+        if(py > this.py + width*5)
+            return -1;
+                        
+        for(int i=0; i<height; i++){
+            for(int j=(px-this.px)/5;j<=(px2-this.px)/5;j++)
+                if(area[j][i]!=0) return this.py+i*5;}
+        return -1;}
+    
     public void draw(int offX, int offY, Graphics2D g){
         int block;
         for(int i=0;i<width;i++)

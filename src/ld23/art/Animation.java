@@ -13,8 +13,8 @@ public class Animation{
 
     public static final Animation HEROLASER = new Animation(new int[]{5,5,20,5,5},Laser.LASER);
     
-    public static final Animation PAUSED = new Animation(new int[]{50},new Sprite[]{Sprite.printText("paused",Color.RED,null)});
-    public static final Animation GAMEOVER = new Animation(new int[]{50},new Sprite[]{Sprite.printText("game over",Color.RED,null)});
+    public static final Animation PAUSED = new Animation(new int[]{50},new Sprite[]{Sprite.printText("paused",0,0)});
+    public static final Animation GAMEOVER = new Animation(new int[]{50},new Sprite[]{Sprite.printText("game over",0,0)});
     
     private final int[] delays;
     private final Drawable[] frames;
@@ -25,6 +25,9 @@ public class Animation{
         this.delays = delays;
         this.frames = frames;
         counter = pos = 0;}
+    
+    public Animation(Drawable[] frames, int[] delays){
+        this(delays,frames);}
     
     public void draw(int px, int py, int width, int height, int faces, Graphics2D g){
         frames[pos].draw(px, py, width, height, faces, g);

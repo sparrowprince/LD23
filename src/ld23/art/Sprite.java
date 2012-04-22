@@ -1,11 +1,8 @@
 package ld23.art;
 
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
-import java.awt.image.ColorConvertOp;
-import java.awt.image.RGBImageFilter;
 
 import javax.swing.ImageIcon;
 
@@ -20,6 +17,11 @@ public class Sprite implements Drawable{
     private static final Sprite HEROGLOW_3 = new Sprite(SPRITES.getSubimage(48,24,16,8));    
     public static final Sprite[] HEROGLOW = {HEROGLOW_0,HEROGLOW_1,HEROGLOW_2,HEROGLOW_3,HEROGLOW_2,HEROGLOW_1,HEROGLOW_0};
     
+    public static final Sprite HAREIDLE_0 = new Sprite(SPRITES.getSubimage(0,96,32,32)); 
+    private static final Sprite HAREMOVE_1 = new Sprite(SPRITES.getSubimage(32,96,32,32));
+    private static final Sprite HAREMOVE_2 = new Sprite(SPRITES.getSubimage(64,96,32,32));
+    public static final Sprite[] HAREMOVE = {HAREIDLE_0,HAREMOVE_1,HAREIDLE_0,HAREMOVE_2};
+    
     public static final Sprite FORK = new Sprite(SPRITES.getSubimage(96,0,16,3));
     public static final Sprite BLOOD = new Sprite(SPRITES.getSubimage(96,3,16,3));
 
@@ -31,15 +33,15 @@ public class Sprite implements Drawable{
             ALPH[i] = SPRITES.getSubimage((i%8)*16,32+(i/8)*16,16,16);
         return ALPH;}    
     
-    public static Sprite printText(String text, Color c, Color h){
-        BufferedImage temp = new BufferedImage(text.length()*16,16,BufferedImage.TYPE_INT_ARGB);
+    public static Sprite printText(String text, int c, int h){
+        BufferedImage temp = new BufferedImage(text.length()*16,16,BufferedImage.TYPE_INT_ARGB);        
         Graphics2D tempG = temp.createGraphics();
-
         
         int pos;
         for(int i=0;i<text.length();i++){
             pos = text.charAt(i)-'a';
-            if(text.charAt(i)!=' ') tempG.drawImage(ALPH[pos],i*16,0,null);}
+            if(text.charAt(i)!=' ')
+                tempG.drawImage(ALPH[pos],null,i*16,0);}
         
         tempG.dispose();
         return new Sprite(temp);}
